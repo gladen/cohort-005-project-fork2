@@ -50,10 +50,10 @@ describe("noteEditorState", () => {
     expect(state.status).toEqual({ kind: "unsaved" });
   });
 
-  it("marks a cleared note as unsaved but not saveable", () => {
-    const state = noteEditorState("", saved);
+  it("says a cleared note cannot be saved, rather than calling it unsaved", () => {
+    const state = noteEditorState("  ", saved);
     expect(state.canSave).toBe(false);
-    expect(state.status).toEqual({ kind: "unsaved" });
+    expect(state.status).toEqual({ kind: "cleared" });
   });
 
   it("accepts a draft of exactly the maximum length", () => {

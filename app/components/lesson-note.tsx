@@ -101,6 +101,8 @@ function statusText(status: NoteStatus): string {
       return "";
     case "unsaved":
       return "Unsaved changes";
+    case "cleared":
+      return "A note can't be empty. Undo to keep your saved note.";
     case "too-long":
       return "Too long to save";
     case "saved":

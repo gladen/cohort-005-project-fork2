@@ -1,6 +1,7 @@
 export type NoteStatus =
   | { kind: "empty" }
   | { kind: "unsaved" }
+  | { kind: "cleared" }
   | { kind: "too-long" }
   | { kind: "saved"; updatedAt: string };
 
@@ -29,11 +30,13 @@ export function deriveNoteEditorState({
 
   const status: NoteStatus = tooLong
     ? { kind: "too-long" }
-    : !unchanged
-      ? { kind: "unsaved" }
-      : saved
-        ? { kind: "saved", updatedAt: saved.updatedAt }
-        : { kind: "empty" };
+    : length === 0 && saved
+      ? { kind: "cleared" }
+      : !unchanged
+        ? { kind: "unsaved" }
+        : saved
+          ? { kind: "saved", updatedAt: saved.updatedAt }
+          : { kind: "empty" };
 
   return {
     length,
