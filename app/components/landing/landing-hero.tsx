@@ -92,7 +92,7 @@ function SpotlightCard({ course }: { course: SpotlightCourse }) {
       />
       <div className="p-6">
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-          New{course.categoryName ? ` · ${course.categoryName}` : ""}
+          Newest{course.categoryName ? ` · ${course.categoryName}` : ""}
         </p>
         <h2 className="mt-2 text-xl font-semibold leading-snug group-hover:text-primary">
           {course.title}
