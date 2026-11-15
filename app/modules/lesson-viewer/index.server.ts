@@ -40,7 +40,7 @@ export function createLessonViewer(database: Db) {
       userId: number,
       quizId: number,
       selectedAnswers: Record<number, number>
-    ) => computeResult(database, userId, quizId, selectedAnswers),
+    ) => computeResult(database, { userId, quizId, selectedAnswers }),
     comment: (commentId: number) => getCommentById(database, commentId),
     /** The Lesson's Discussion, nested and rendered to sanitised HTML. */
     renderedThread: (lessonId: number) =>
