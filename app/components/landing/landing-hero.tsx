@@ -1,7 +1,8 @@
 import { Link } from "react-router";
-import { ArrowRight, BookOpen, User } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { CourseImage } from "~/components/course-image";
+import { CourseByline } from "./course-byline";
 import type { HeroAction } from "~/modules/landing";
 
 export type SpotlightCourse = {
@@ -93,16 +94,11 @@ function SpotlightCard({ course }: { course: SpotlightCourse }) {
         <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
           {course.description}
         </p>
-        <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <User className="size-3" />
-            {course.instructorName ?? "Instructor"}
-          </span>
-          <span className="flex items-center gap-1">
-            <BookOpen className="size-3" />
-            {course.lessonCount} lessons
-          </span>
-        </div>
+        <CourseByline
+          className="mt-4"
+          instructorName={course.instructorName}
+          lessonCount={course.lessonCount}
+        />
       </div>
     </Link>
   );

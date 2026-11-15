@@ -9,10 +9,11 @@ import {
   CardHeader,
 } from "~/components/ui/card";
 import { CourseStatus } from "~/db/schema";
-import { BookOpen, ArrowRight, User, Moon, Sun } from "lucide-react";
+import { ArrowRight, Moon, Sun } from "lucide-react";
 import { CourseImage } from "~/components/course-image";
 import { LandingHero } from "~/components/landing/landing-hero";
 import { LandingStats } from "~/components/landing/landing-stats";
+import { CourseByline } from "~/components/landing/course-byline";
 import {
   heroActions,
   landingShowcase,
@@ -288,15 +289,12 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                       {course.description}
                     </p>
                   </CardContent>
-                  <CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <User className="size-3" />
-                      {course.instructorName ?? "Instructor"}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <BookOpen className="size-3" />
-                      {course.lessonCount} lessons
-                    </span>
+                  <CardFooter>
+                    <CourseByline
+                      className="w-full"
+                      instructorName={course.instructorName}
+                      lessonCount={course.lessonCount}
+                    />
                   </CardFooter>
                 </Card>
               </Link>
