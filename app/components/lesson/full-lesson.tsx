@@ -14,6 +14,7 @@ import {
   type RenderedComment,
 } from "~/components/comment-thread";
 import { LessonNote } from "~/components/lesson-note";
+import type { SavedNote } from "~/modules/lesson-note";
 import { YouTubePlayer } from "~/components/youtube-player";
 import { LessonProgressStatus } from "~/db/schema";
 import { formatDuration } from "~/lib/utils";
@@ -51,7 +52,7 @@ export type FullLessonData = {
   canModerate: boolean;
   instructorName: string;
   bookmarked: boolean;
-  note: { body: string; updatedAt: string } | null;
+  note: SavedNote | null;
 };
 
 export function FullLesson({ data }: { data: FullLessonData }) {

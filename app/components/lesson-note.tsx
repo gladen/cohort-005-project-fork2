@@ -8,15 +8,12 @@ import {
   noteEditorState,
   type NoteEditorState,
   type NoteStatus,
+  type SavedNote,
 } from "~/modules/lesson-note";
 import { cn, formatRelativeTime } from "~/lib/utils";
 
 /** The Student's private Note on a Lesson, styled to sit with the discussion card. */
-export function LessonNote({
-  note,
-}: {
-  note: { body: string; updatedAt: string } | null;
-}) {
+export function LessonNote({ note }: { note: SavedNote | null }) {
   const fetcher = useFetcher<{ ok: boolean; error?: string }>();
   const [draft, setDraft] = useState(note?.body ?? "");
   const isSaving = fetcher.state !== "idle";

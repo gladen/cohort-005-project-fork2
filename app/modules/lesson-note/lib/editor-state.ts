@@ -1,3 +1,6 @@
+/** The Student's Note as last stored. */
+export type SavedNote = { body: string; updatedAt: string };
+
 export type NoteStatus =
   | { kind: "empty" }
   | { kind: "unsaved" }
@@ -19,7 +22,7 @@ export function deriveNoteEditorState({
   maxLength,
 }: {
   draft: string;
-  saved: { body: string; updatedAt: string } | null;
+  saved: SavedNote | null;
   maxLength: number;
 }): NoteEditorState {
   // The server trims before it stores, so compare what it would store.
