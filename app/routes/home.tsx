@@ -34,6 +34,15 @@ function getUserById(id: number) {
   return db.select().from(users).where(eq(users.id, id)).get();
 }
 
+function countPublishedCourses() {
+  const row = db
+    .select({ count: sql<number>`count(*)` })
+    .from(courses)
+    .where(eq(courses.status, CourseStatus.Published))
+    .get();
+  return row?.count ?? 0;
+}
+
 function getAllCategories() {
   return db.select().from(categories).orderBy(categories.name).all();
 }
@@ -123,15 +132,14 @@ export function meta() {
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const courses = buildCourseQuery(
+  const showcase = buildCourseQuery(
     null,
     null,
     CourseStatus.Published,
     "newest",
-    50,
+    SHOWCASE_SIZE,
     0
   );
-  const showcase = courses.slice(0, SHOWCASE_SIZE);
   const lessonCounts = getLessonCountsForCourses(showcase.map((c) => c.id));
   const { spotlight, featured } = landingShowcase(
     showcase.map((course) => ({
@@ -150,7 +158,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     spotlight,
     featuredCourses: featured,
     stats: landingStats({
-      totalCourses: courses.length,
+      totalCourses: countPublishedCourses(),
       totalCategories: categories.length,
     }),
     users: users.map((u) => ({ id: u.id, name: u.name, role: u.role })),
