@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 import { CourseImage } from "~/components/course-image";
 import { CourseByline } from "./course-byline";
 import type { HeroAction } from "~/modules/landing";
@@ -28,7 +29,12 @@ export function LandingHero({
         aria-hidden
         className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-gradient-to-l from-primary/5 to-transparent lg:block"
       />
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-[1.15fr_1fr] lg:py-28">
+      <div
+        className={cn(
+          "relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:py-28",
+          spotlight && "lg:grid-cols-[1.15fr_1fr]"
+        )}
+      >
         <div>
           <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
             <span className="size-1.5 rounded-full bg-primary" />
