@@ -47,6 +47,29 @@ const saveNoteSchema = z.object({
     ),
 });
 
+const recordId = z.coerce.number().int().positive();
+
+/** Each answer arrives as a field named `question-{questionId}` holding the option id. */
+function selectedAnswersFrom(fields: Record<string, unknown>) {
+  const selectedAnswers: Record<number, number> = {};
+  for (const [key, value] of Object.entries(fields)) {
+    const questionId = recordId.safeParse(/^question-(.+)$/.exec(key)?.[1]);
+    const optionId = recordId.safeParse(value);
+    if (questionId.success && optionId.success) {
+      selectedAnswers[questionId.data] = optionId.data;
+    }
+  }
+  return selectedAnswers;
+}
+
+const submitQuizSchema = z
+  .object({ quizId: recordId })
+  .passthrough()
+  .transform(({ quizId, ...fields }) => ({
+    quizId,
+    selectedAnswers: selectedAnswersFrom(fields),
+  }));
+
 const deleteCommentSchema = z.object({
   intent: z.literal("delete-comment"),
   commentId: z.coerce.number().int(),
@@ -339,27 +362,16 @@ export async function action({ params, request }: Route.ActionArgs) {
   }
 
   if (intent === "submit-quiz") {
-    const quizId = Number(formData.get("quizId"));
-    if (isNaN(quizId)) {
+    const parsed = parseFormData(formData, submitQuizSchema);
+    if (!parsed.success) {
       throw data("Invalid quiz ID", { status: 400 });
     }
+    const { quizId, selectedAnswers } = parsed.data;
     // Scope the quiz to this lesson so a quiz elsewhere can't be reached by
     // posting its id to this route.
     const quiz = lessonViewer.quiz(quizId);
     if (!quiz || quiz.lessonId !== lessonId) {
       throw data("Quiz not found", { status: 404 });
-    }
-
-    // Collect answers: form fields named "question-{questionId}" with value = optionId
-    const selectedAnswers: Record<number, number> = {};
-    for (const [key, value] of formData.entries()) {
-      if (key.startsWith("question-")) {
-        const questionId = Number(key.replace("question-", ""));
-        const optionId = Number(value);
-        if (!isNaN(questionId) && !isNaN(optionId)) {
-          selectedAnswers[questionId] = optionId;
-        }
-      }
     }
 
     const result = lessonViewer.submitQuiz(
