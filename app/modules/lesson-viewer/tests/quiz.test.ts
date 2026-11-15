@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { eq } from "drizzle-orm";
+import * as schema from "~/db/schema";
 import { addQuiz, lessonViewerFixture, type Fixture } from "./fixtures";
 
 let f: Fixture;
@@ -86,6 +88,35 @@ describe("submitQuiz", () => {
       correct: false,
       selectedOptionId: null,
       correctOptionId: null,
+    });
+  });
+
+  it("records each answer given with the attempt", () => {
+    const result = f.viewer.submitQuiz(f.base.user.id, q.quiz.id, {
+      [q.multiple.id]: q.multiple.wrong,
+    });
+    expect(
+      f.db
+        .select()
+        .from(schema.quizAnswers)
+        .where(eq(schema.quizAnswers.attemptId, result?.attemptId ?? -1))
+        .all()
+        .map(({ questionId, selectedOptionId }) => ({
+          questionId,
+          selectedOptionId,
+        }))
+    ).toEqual([
+      { questionId: q.multiple.id, selectedOptionId: q.multiple.wrong },
+    ]);
+  });
+
+  it("scores a submission with no answers as zero", () => {
+    expect(f.viewer.submitQuiz(f.base.user.id, q.quiz.id, {})).toMatchObject({
+      score: 0,
+      passed: false,
+      grade: "F",
+      totalCorrect: 0,
+      totalQuestions: 2,
     });
   });
 

@@ -1,6 +1,5 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import {
-  QuestionType,
   quizAnswers,
   quizAttempts,
   quizOptions,
@@ -14,14 +13,11 @@ export function getQuizByLessonId(db: Db, lessonId: number) {
 }
 
 function optionsByQuestion(db: Db, questionIds: number[]) {
-  const options =
-    questionIds.length === 0
-      ? []
-      : db
-          .select()
-          .from(quizOptions)
-          .where(inArray(quizOptions.questionId, questionIds))
-          .all();
+  const options = db
+    .select()
+    .from(quizOptions)
+    .where(inArray(quizOptions.questionId, questionIds))
+    .all();
   const byQuestion = new Map<number, (typeof options)[number][]>();
   for (const option of options) {
     const list = byQuestion.get(option.questionId) ?? [];
@@ -91,11 +87,6 @@ export type QuizSubmission = {
   selectedAnswers: Record<number, number>;
 };
 
-const SCORED_QUESTION_TYPES = new Set<string>([
-  QuestionType.MultipleChoice,
-  QuestionType.TrueFalse,
-]);
-
 function scoreQuestions(
   db: Db,
   quizId: number,
@@ -116,10 +107,9 @@ function scoreQuestions(
         correctOptionId: null,
       };
     }
-    const correctOptionId = SCORED_QUESTION_TYPES.has(question.questionType)
-      ? ((options.get(question.id) ?? []).find((o) => o.isCorrect === true)
-          ?.id ?? null)
-      : null;
+    const correctOptionId =
+      (options.get(question.id) ?? []).find((o) => o.isCorrect === true)?.id ??
+      null;
     return {
       questionId: question.id,
       correct: selected === correctOptionId,
