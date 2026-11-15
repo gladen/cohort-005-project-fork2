@@ -10,45 +10,33 @@ export type Curriculum = Array<{
   lessons: Array<{ id: number; title: string }>;
 }>;
 
+type CurriculumSidebarProps = {
+  course: { id: number; title: string; slug: string };
+  curriculum: Curriculum;
+  currentLessonId: number;
+  lessonProgressMap: Record<number, string>;
+  enrolled: boolean;
+};
+
 export function CurriculumSidebar({
   course,
   curriculum,
   currentLessonId,
   lessonProgressMap,
   enrolled,
-}: {
-  course: { id: number; title: string; slug: string };
-  curriculum: Array<{
-    id: number;
-    title: string;
-    lessons: Array<{ id: number; title: string }>;
-  }>;
-  currentLessonId: number;
-  lessonProgressMap: Record<number, string>;
-  enrolled: boolean;
-}) {
-  // Find which module the current lesson belongs to
+}: CurriculumSidebarProps) {
   const currentModuleId = curriculum.find((m) =>
     m.lessons.some((l) => l.id === currentLessonId)
   )?.id;
 
   const [expandedModules, setExpandedModules] = useState<Set<number>>(() => {
-    // Start with current module expanded
     const initial = new Set<number>();
     if (currentModuleId) initial.add(currentModuleId);
     return initial;
   });
 
   function toggleModule(moduleId: number) {
-    setExpandedModules((prev) => {
-      const next = new Set(prev);
-      if (next.has(moduleId)) {
-        next.delete(moduleId);
-      } else {
-        next.add(moduleId);
-      }
-      return next;
-    });
+    setExpandedModules((prev) => toggled(prev, moduleId));
   }
 
   return (
@@ -64,68 +52,121 @@ export function CurriculumSidebar({
         </div>
 
         <nav className="flex-1 p-2">
-          {curriculum.map((mod) => {
-            const isExpanded = expandedModules.has(mod.id);
-
-            return (
-              <div key={mod.id} className="mb-1">
-                <button
-                  onClick={() => toggleModule(mod.id)}
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted"
-                >
-                  <ChevronDown
-                    className={cn(
-                      "size-4 shrink-0 transition-transform",
-                      !isExpanded && "-rotate-90"
-                    )}
-                  />
-                  <span className="flex-1 text-left">{mod.title}</span>
-                </button>
-
-                {isExpanded && (
-                  <ul className="ml-4 space-y-0.5 py-1">
-                    {mod.lessons.map((l) => {
-                      const isCurrent = l.id === currentLessonId;
-                      const status = lessonProgressMap[l.id];
-                      const isCompleted =
-                        status === LessonProgressStatus.Completed;
-                      const isInProgress =
-                        status === LessonProgressStatus.InProgress;
-
-                      return (
-                        <li key={l.id}>
-                          <Link
-                            to={`/courses/${course.slug}/lessons/${l.id}`}
-                            className={cn(
-                              "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors",
-                              isCurrent
-                                ? "bg-primary/10 font-medium text-primary"
-                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                            )}
-                          >
-                            {enrolled ? (
-                              isCompleted ? (
-                                <CheckCircle2 className="size-3.5 shrink-0 text-green-500" />
-                              ) : isInProgress ? (
-                                <PlayCircle className="size-3.5 shrink-0 text-blue-500" />
-                              ) : (
-                                <Circle className="size-3.5 shrink-0" />
-                              )
-                            ) : (
-                              <Circle className="size-3.5 shrink-0" />
-                            )}
-                            <span className="truncate">{l.title}</span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </div>
-            );
-          })}
+          {curriculum.map((mod) => (
+            <ModuleItem
+              key={mod.id}
+              mod={mod}
+              courseSlug={course.slug}
+              isExpanded={expandedModules.has(mod.id)}
+              onToggle={() => toggleModule(mod.id)}
+              currentLessonId={currentLessonId}
+              lessonProgressMap={lessonProgressMap}
+              enrolled={enrolled}
+            />
+          ))}
         </nav>
       </div>
     </aside>
   );
+}
+
+function ModuleItem({
+  mod,
+  courseSlug,
+  isExpanded,
+  onToggle,
+  currentLessonId,
+  lessonProgressMap,
+  enrolled,
+}: {
+  mod: Curriculum[number];
+  courseSlug: string;
+  isExpanded: boolean;
+  onToggle: () => void;
+  currentLessonId: number;
+  lessonProgressMap: Record<number, string>;
+  enrolled: boolean;
+}) {
+  return (
+    <div className="mb-1">
+      <button
+        onClick={onToggle}
+        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted"
+      >
+        <ChevronDown
+          className={cn(
+            "size-4 shrink-0 transition-transform",
+            !isExpanded && "-rotate-90"
+          )}
+        />
+        <span className="flex-1 text-left">{mod.title}</span>
+      </button>
+
+      {isExpanded && (
+        <ul className="ml-4 space-y-0.5 py-1">
+          {mod.lessons.map((l) => (
+            <LessonItem
+              key={l.id}
+              lesson={l}
+              courseSlug={courseSlug}
+              isCurrent={l.id === currentLessonId}
+              status={lessonProgressMap[l.id]}
+              enrolled={enrolled}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function LessonItem({
+  lesson,
+  courseSlug,
+  isCurrent,
+  status,
+  enrolled,
+}: {
+  lesson: { id: number; title: string };
+  courseSlug: string;
+  isCurrent: boolean;
+  status: string | undefined;
+  enrolled: boolean;
+}) {
+  return (
+    <li>
+      <Link
+        to={`/courses/${courseSlug}/lessons/${lesson.id}`}
+        className={cn(
+          "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors",
+          isCurrent
+            ? "bg-primary/10 font-medium text-primary"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+        )}
+      >
+        <LessonStatusIcon status={enrolled ? status : undefined} />
+        <span className="truncate">{lesson.title}</span>
+      </Link>
+    </li>
+  );
+}
+
+function LessonStatusIcon({ status }: { status: string | undefined }) {
+  if (status === LessonProgressStatus.Completed) {
+    return <CheckCircle2 className="size-3.5 shrink-0 text-green-500" />;
+  }
+  if (status === LessonProgressStatus.InProgress) {
+    return <PlayCircle className="size-3.5 shrink-0 text-blue-500" />;
+  }
+  return <Circle className="size-3.5 shrink-0" />;
+}
+
+function toggled(set: Set<number>, id: number) {
+  const next = new Set(set);
+  if (next.has(id)) {
+    next.delete(id);
+  } else {
+    next.add(id);
+  }
+  return next;
 }

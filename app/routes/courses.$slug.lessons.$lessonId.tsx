@@ -182,12 +182,10 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     : false;
   const note = currentUserId ? getNote(db, currentUserId, lessonId) : undefined;
 
-  // Render lesson content from Markdown to HTML server-side
   const contentHtml = lesson.content
     ? await renderMarkdown(lesson.content)
     : null;
 
-  // Build prev/next navigation
   const allLessons = lessonViewer.flattenCourseLessons(courseWithDetails);
   const currentIndex = allLessons.findIndex((l) => l.id === lessonId);
   const prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
