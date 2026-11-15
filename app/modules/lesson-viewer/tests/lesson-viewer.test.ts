@@ -65,7 +65,11 @@ describe("visitLesson", () => {
   });
 
   it("keeps a completed lesson completed", () => {
-    f.viewer.markLessonComplete(f.base.user.id, f.lessons.a.id);
+    f.viewer.markLessonComplete(
+      f.base.user.id,
+      f.lessons.a.id,
+      new Date("2026-11-01T10:00:00.000Z")
+    );
     expect(visit().lessonStatus).toBe(LessonProgressStatus.Completed);
   });
 

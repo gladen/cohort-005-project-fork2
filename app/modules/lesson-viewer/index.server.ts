@@ -30,8 +30,8 @@ export function createLessonViewer(database: Db) {
     flattenCourseLessons,
     visitLesson: (visit: Parameters<typeof visitLesson>[1]) =>
       visitLesson(database, visit),
-    markLessonComplete: (userId: number, lessonId: number) =>
-      markLessonComplete(database, userId, lessonId),
+    markLessonComplete: (userId: number, lessonId: number, now: Date) =>
+      markLessonComplete(database, { userId, lessonId }, now),
     lessonQuiz: (lessonId: number, userId: number | null) =>
       lessonQuiz(database, lessonId, userId),
     quiz: (quizId: number) => getQuizById(database, quizId),
